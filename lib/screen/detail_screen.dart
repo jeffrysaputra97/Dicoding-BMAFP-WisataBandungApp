@@ -2,8 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wisata_bandung/component/detail_gallery_image_network.dart';
 import 'package:wisata_bandung/component/detail_icon_text.dart';
+import 'package:wisata_bandung/model/tourism_place.dart';
 
 class DetailScreen extends StatelessWidget {
+  final TourismPlace place;
+
+  DetailScreen({@required this.place});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,11 +17,31 @@ class DetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.asset('images/farm-house.jpg'),
+            Stack(
+              children: [
+                Hero(
+                  tag: 'image${place.name}',
+                  child: Image.asset(place.imageAsset),
+                ),
+                SafeArea(
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      FavoriteButton(),
+                    ],
+                  ),
+                )
+              ],
+            ),
             Container(
               margin: EdgeInsets.only(top: 16.0),
               child: Text(
-                'Farm House Lembang',
+                place.name,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 30.0,
@@ -31,15 +56,15 @@ class DetailScreen extends StatelessWidget {
                 children: [
                   DetailIconText(
                     icon: Icons.calendar_today,
-                    text: 'Open Everyday',
+                    text: place.openDays,
                   ),
                   DetailIconText(
                     icon: Icons.access_time,
-                    text: '09:00 - 20:00',
+                    text: place.openTime,
                   ),
                   DetailIconText(
                     icon: Icons.monetization_on,
-                    text: 'Rp 25.000',
+                    text: place.ticketPrice,
                   )
                 ],
               ),
@@ -47,7 +72,7 @@ class DetailScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'Berada di jalur utama Bandung-Lembang, Farm House menjadi objek wisata yang tidak pernah sepi pengunjung. Selain karena letaknya strategis, kawasan ini juga menghadirkan nuansa wisata khas Eropa. Semua itu diterapkan dalam bentuk spot swafoto Instagramable.',
+                place.description,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16.0),
               ),
@@ -56,25 +81,38 @@ class DetailScreen extends StatelessWidget {
               height: 150.0,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                children: [
-                  DetailGalleryImageNetwork(
-                    url:
-                        'https://media-cdn.tripadvisor.com/media/photo-s/0d/7c/59/70/farmhouse-lembang.jpg',
-                  ),
-                  DetailGalleryImageNetwork(
-                    url:
-                        'https://media-cdn.tripadvisor.com/media/photo-w/13/f0/22/f6/photo3jpg.jpg',
-                  ),
-                  DetailGalleryImageNetwork(
-                    url:
-                        'https://media-cdn.tripadvisor.com/media/photo-m/1280/16/a9/33/43/liburan-di-farmhouse.jpg',
-                  ),
-                ],
+                children: place.imageUrls
+                    .map((url) => DetailGalleryImageNetwork(url: url))
+                    .toList(),
               ),
             )
           ],
         ),
       ),
+    );
+  }
+}
+
+class FavoriteButton extends StatefulWidget {
+  @override
+  _FavoriteButtonState createState() => _FavoriteButtonState();
+}
+
+class _FavoriteButtonState extends State<FavoriteButton> {
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        isFavorite ? Icons.favorite : Icons.favorite_border,
+        color: Colors.red,
+      ),
+      onPressed: () {
+        setState(() {
+          isFavorite = !isFavorite;
+        });
+      },
     );
   }
 }
